@@ -3,7 +3,7 @@ uvicorn
 python-multipart
 pillow
 numpy
-tensorflow
+tensorflow==2.12.0
 aiofiles
 jinja2
 keras
