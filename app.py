@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 import keras
+import os
+import gdown
 import numpy as np
 import pandas as pd
 from typing import List, Union
@@ -14,98 +16,135 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, Input
 
-# Rebuild architecture
-input_shape = (128, 128, 3)
-input_layer = Input(shape=input_shape)
-
-x = Conv2D(32, (3, 3), activation='relu')(input_layer)
-x = MaxPooling2D((2, 2))(x)
-x = BatchNormalization()(x)
-x = Dropout(0.2)(x)
-
-x = Conv2D(64, (3, 3), activation='relu')(x)
-x = BatchNormalization()(x)
-x = Dropout(0.2)(x)
-
-x = Conv2D(128, (3, 3), activation='relu')(x)
-x = BatchNormalization()(x)
-x = Dropout(0.2)(x)
-
-x = Flatten()(x)
-x = Dense(128, activation='relu')(x)
-x = Dropout(0.5)(x)
-x = BatchNormalization()(x)
-
-
-# tshirt model outputs
-tshirt_output_attr1 = Dense(5, activation='softmax', name='attr1_output')(x)
-tshirt_output_attr2 = Dense(2, activation='softmax', name='attr2_output')(x)
-tshirt_output_attr3 = Dense(2, activation='softmax', name='attr3_output')(x)
-tshirt_output_attr4 = Dense(3, activation='softmax', name='attr4_output')(x)
-tshirt_output_attr5 = Dense(2, activation='softmax', name='attr5_output')(x)
-tshirt = Model(inputs=input_layer, outputs=[tshirt_output_attr1, tshirt_output_attr2, tshirt_output_attr3, tshirt_output_attr4, tshirt_output_attr5])
-
-# kurti model outputs
-kurti_output_attr1 = Dense(13, activation='softmax', name='attr1_output')(x)
-kurti_output_attr2 = Dense(2, activation='softmax', name='attr2_output')(x)
-kurti_output_attr3 = Dense(2, activation='softmax', name='attr3_output')(x)
-kurti_output_attr4 = Dense(2, activation='softmax', name='attr4_output')(x)
-kurti_output_attr5 = Dense(2, activation='softmax', name='attr5_output')(x)
-kurti_output_attr6 = Dense(2, activation='softmax', name='attr6_output')(x)
-kurti_output_attr7 = Dense(2, activation='softmax', name='attr7_output')(x)
-kurti_output_attr8 = Dense(3, activation='softmax', name='attr8_output')(x)
-kurti_output_attr9 = Dense(2, activation='softmax', name='attr9_output')(x)
-kurti = Model(inputs=input_layer, outputs=[kurti_output_attr1, kurti_output_attr2, kurti_output_attr3,kurti_output_attr4, kurti_output_attr5, kurti_output_attr6,kurti_output_attr7, kurti_output_attr8, kurti_output_attr9])
-
-# saree model outputs
-saree_output_attr1 = Dense(4, activation='softmax', name='attr1_output')(x)
-saree_output_attr2 = Dense(6, activation='softmax', name='attr2_output')(x)
-saree_output_attr3 = Dense(3, activation='softmax', name='attr3_output')(x)
-saree_output_attr4 = Dense(8, activation='softmax', name='attr4_output')(x)
-saree_output_attr5 = Dense(4, activation='softmax', name='attr5_output')(x)
-saree_output_attr6 = Dense(3, activation='softmax', name='attr6_output')(x)
-saree_output_attr7 = Dense(5, activation='softmax', name='attr7_output')(x)
-saree_output_attr8 = Dense(5, activation='softmax', name='attr8_output')(x)
-saree_output_attr9 = Dense(9, activation='softmax', name='attr9_output')(x)
-saree_output_attr10 = Dense(2, activation='softmax', name='attr10_output')(x)
-saree = Model(inputs=input_layer, outputs=[saree_output_attr1, saree_output_attr2, saree_output_attr3, saree_output_attr4, saree_output_attr5,saree_output_attr6,saree_output_attr7,saree_output_attr8,saree_output_attr9,saree_output_attr10 ])
-
-# Women top model outputs
-top_output_attr1 = Dense(12, activation='softmax', name='attr1_output')(x)
-top_output_attr2 = Dense(4, activation='softmax', name='attr2_output')(x)
-top_output_attr3 = Dense(2, activation='softmax', name='attr3_output')(x)
-top_output_attr4 = Dense(7, activation='softmax', name='attr4_output')(x)
-top_output_attr5 = Dense(2, activation='softmax', name='attr5_output')(x)
-top_output_attr6 = Dense(3, activation='softmax', name='attr6_output')(x)
-top_output_attr7 = Dense(6, activation='softmax', name='attr7_output')(x)
-top_output_attr8 = Dense(4, activation='softmax', name='attr8_output')(x)
-top_output_attr9 = Dense(4, activation='softmax', name='attr9_output')(x)
-top_output_attr10 = Dense(6, activation='softmax', name='attr10_output')(x)
-top = Model(inputs=input_layer, outputs=[top_output_attr1, top_output_attr2, top_output_attr3,top_output_attr4, top_output_attr5, top_output_attr6,top_output_attr7, top_output_attr8, top_output_attr9,top_output_attr10])
-
-# Women tshirt model outputs
-women_tshirts_output_attr1 = Dense(7, activation='softmax', name='attr1_output')(x)
-women_tshirts_output_attr2 = Dense(3, activation='softmax', name='attr2_output')(x)
-women_tshirts_output_attr3 = Dense(3, activation='softmax', name='attr3_output')(x)
-women_tshirts_output_attr4 = Dense(3, activation='softmax', name='attr4_output')(x)
-women_tshirts_output_attr5 = Dense(6, activation='softmax', name='attr5_output')(x)
-women_tshirts_output_attr6 = Dense(3, activation='softmax', name='attr6_output')(x)
-women_tshirts_output_attr7 = Dense(2, activation='softmax', name='attr7_output')(x)
-women_tshirts_output_attr8 = Dense(2, activation='softmax', name='attr8_output')(x)
-
-# Create model with 8 outputs
-women_tshirts = Model(inputs=input_layer, outputs=[women_tshirts_output_attr1, women_tshirts_output_attr2, women_tshirts_output_attr3,women_tshirts_output_attr4,women_tshirts_output_attr5,women_tshirts_output_attr6,women_tshirts_output_attr7, women_tshirts_output_attr8])
-     
-# Load weights
-tshirt.load_weights('models/tshirt_model.keras')
-kurti.load_weights('models/kurti_weights.keras')
-saree.load_weights('models/saree_weights.keras')
-top.load_weights('models/women_top_weights.keras')
-women_tshirts.load_weights('models/women_tshirts_weights.keras')
-
-
 # Define the FastAPI app
 app = FastAPI()
+MODEL_DIR = "models"
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+# Global model variables
+tshirt = None
+kurti = None
+saree = None
+top = None
+women_tshirts = None
+
+def download_model_from_drive(file_id, dest_path):
+    if not os.path.exists(dest_path):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        print(f"Downloading {dest_path}...")
+        gdown.download(url, dest_path, quiet=False)
+
+def build_shared_base():
+    input_shape = (128, 128, 3)
+    input_layer = Input(shape=input_shape)
+
+    x = Conv2D(32, (3, 3), activation='relu')(input_layer)
+    x = MaxPooling2D((2, 2))(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.2)(x)
+
+    x = Conv2D(64, (3, 3), activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.2)(x)
+
+    x = Conv2D(128, (3, 3), activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.2)(x)
+
+    x = Flatten()(x)
+    x = Dense(128, activation='relu')(x)
+    x = Dropout(0.5)(x)
+    x = BatchNormalization()(x)
+
+    return input_layer, x
+
+def build_tshirt_model():
+    input_layer, x = build_shared_base()
+    tshirt_output_attr1 = Dense(5, activation='softmax', name='attr1_output')(x)
+    tshirt_output_attr2 = Dense(2, activation='softmax', name='attr2_output')(x)
+    tshirt_output_attr3 = Dense(2, activation='softmax', name='attr3_output')(x)
+    tshirt_output_attr4 = Dense(3, activation='softmax', name='attr4_output')(x)
+    tshirt_output_attr5 = Dense(2, activation='softmax', name='attr5_output')(x)
+    return Model(inputs=input_layer, outputs=[tshirt_output_attr1, tshirt_output_attr2, tshirt_output_attr3, tshirt_output_attr4, tshirt_output_attr5])
+
+def build_kurti_model():
+    input_layer, x = build_shared_base()
+    kurti_output_attr1 = Dense(13, activation='softmax', name='attr1_output')(x)
+    kurti_output_attr2 = Dense(2, activation='softmax', name='attr2_output')(x)
+    kurti_output_attr3 = Dense(2, activation='softmax', name='attr3_output')(x)
+    kurti_output_attr4 = Dense(2, activation='softmax', name='attr4_output')(x)
+    kurti_output_attr5 = Dense(2, activation='softmax', name='attr5_output')(x)
+    kurti_output_attr6 = Dense(2, activation='softmax', name='attr6_output')(x)
+    kurti_output_attr7 = Dense(2, activation='softmax', name='attr7_output')(x)
+    kurti_output_attr8 = Dense(3, activation='softmax', name='attr8_output')(x)
+    kurti_output_attr9 = Dense(2, activation='softmax', name='attr9_output')(x)
+    return Model(inputs=input_layer, outputs=[kurti_output_attr1, kurti_output_attr2, kurti_output_attr3, kurti_output_attr4, kurti_output_attr5, kurti_output_attr6, kurti_output_attr7, kurti_output_attr8, kurti_output_attr9])
+
+def build_saree_model():
+    input_layer, x = build_shared_base()
+    saree_output_attr1 = Dense(4, activation='softmax', name='attr1_output')(x)
+    saree_output_attr2 = Dense(6, activation='softmax', name='attr2_output')(x)
+    saree_output_attr3 = Dense(3, activation='softmax', name='attr3_output')(x)
+    saree_output_attr4 = Dense(8, activation='softmax', name='attr4_output')(x)
+    saree_output_attr5 = Dense(4, activation='softmax', name='attr5_output')(x)
+    saree_output_attr6 = Dense(3, activation='softmax', name='attr6_output')(x)
+    saree_output_attr7 = Dense(5, activation='softmax', name='attr7_output')(x)
+    saree_output_attr8 = Dense(5, activation='softmax', name='attr8_output')(x)
+    saree_output_attr9 = Dense(9, activation='softmax', name='attr9_output')(x)
+    saree_output_attr10 = Dense(2, activation='softmax', name='attr10_output')(x)
+    return Model(inputs=input_layer, outputs=[saree_output_attr1, saree_output_attr2, saree_output_attr3, saree_output_attr4, saree_output_attr5, saree_output_attr6, saree_output_attr7, saree_output_attr8, saree_output_attr9, saree_output_attr10])
+
+def build_top_model():
+    input_layer, x = build_shared_base()
+    top_output_attr1 = Dense(12, activation='softmax', name='attr1_output')(x)
+    top_output_attr2 = Dense(4, activation='softmax', name='attr2_output')(x)
+    top_output_attr3 = Dense(2, activation='softmax', name='attr3_output')(x)
+    top_output_attr4 = Dense(7, activation='softmax', name='attr4_output')(x)
+    top_output_attr5 = Dense(2, activation='softmax', name='attr5_output')(x)
+    top_output_attr6 = Dense(3, activation='softmax', name='attr6_output')(x)
+    top_output_attr7 = Dense(6, activation='softmax', name='attr7_output')(x)
+    top_output_attr8 = Dense(4, activation='softmax', name='attr8_output')(x)
+    top_output_attr9 = Dense(4, activation='softmax', name='attr9_output')(x)
+    top_output_attr10 = Dense(6, activation='softmax', name='attr10_output')(x)
+    return Model(inputs=input_layer, outputs=[top_output_attr1, top_output_attr2, top_output_attr3, top_output_attr4, top_output_attr5, top_output_attr6, top_output_attr7, top_output_attr8, top_output_attr9, top_output_attr10])
+
+def build_women_tshirts_model():
+    input_layer, x = build_shared_base()
+    women_tshirts_output_attr1 = Dense(7, activation='softmax', name='attr1_output')(x)
+    women_tshirts_output_attr2 = Dense(3, activation='softmax', name='attr2_output')(x)
+    women_tshirts_output_attr3 = Dense(3, activation='softmax', name='attr3_output')(x)
+    women_tshirts_output_attr4 = Dense(3, activation='softmax', name='attr4_output')(x)
+    women_tshirts_output_attr5 = Dense(6, activation='softmax', name='attr5_output')(x)
+    women_tshirts_output_attr6 = Dense(3, activation='softmax', name='attr6_output')(x)
+    women_tshirts_output_attr7 = Dense(2, activation='softmax', name='attr7_output')(x)
+    women_tshirts_output_attr8 = Dense(2, activation='softmax', name='attr8_output')(x)
+    return Model(inputs=input_layer, outputs=[women_tshirts_output_attr1 , women_tshirts_output_attr2 , women_tshirts_output_attr3 , women_tshirts_output_attr4, women_tshirts_output_attr5, women_tshirts_output_attr6, women_tshirts_output_attr7 , women_tshirts_output_attr8])
+
+@app.on_event("startup")
+def load_models():
+    global tshirt, kurti, saree, top, women_tshirts
+
+    download_model_from_drive('1OZBQccslqN5HdviewYFD4WxIovdHxkyP', f'{MODEL_DIR}/tshirt_model.keras')
+    download_model_from_drive('175PtqO7e8J_Uc_RYPG2kbmTKZWwTCfdw', f'{MODEL_DIR}/kurti_weights.keras')
+    download_model_from_drive('1GKq45ljHniW2IPXN7lcTXSagc_A6PlZc', f'{MODEL_DIR}/saree_weights.keras')
+    download_model_from_drive('1km6cDHpLiCwDFkqjXgWsW49jRPgpKd8V', f'{MODEL_DIR}/women_top_weights.keras')
+    download_model_from_drive('12wIMgxpIXDThJxquNv_b79hnHn0ocSgp', f'{MODEL_DIR}/women_tshirts_weights.keras')
+
+    tshirt = build_tshirt_model()
+    kurti = build_kurti_model()
+    saree = build_saree_model()
+    top = build_top_model()
+    women_tshirts = build_women_tshirts_model() 
+    tshirt.load_weights(f'{MODEL_DIR}/tshirt_model.keras')
+    print("T-shirt model weights loaded.")
+    kurti.load_weights(f'{MODEL_DIR}/kurti_weights.keras')
+    print("Kurti model weights loaded.")
+    saree.load_weights(f'{MODEL_DIR}/saree_weights.keras')
+    print("Saree model weights loaded.")
+    top.load_weights(f'{MODEL_DIR}/top_weights.keras')
+    print("top model weights loaded.")
+    women_tshirts.load_weights(f'{MODEL_DIR}/women_tshirts_weights.keras') 
+    print("women_tshirts model weights loaded.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -283,6 +322,10 @@ async def predict(category: str = Form(...),file: UploadFile = File(...) ):
             "Extra Design": attr8_pred
         }
     
+@app.get("/")
+def health_check():
+    return {"status": "ready"}
+
 @app.get("/")
 def serve_home():
     return FileResponse("home.html")
